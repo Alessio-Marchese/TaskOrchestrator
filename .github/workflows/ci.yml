@@ -1,0 +1,35 @@
+name: CI/CD NuGet
+
+on:
+  push:
+    branches:
+      - add-ci
+  release:
+    types: [published]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.0.x'
+
+      - name: Restore dependencies core
+        run: dotnet "Tests/Tests.csproj" restore
+
+      - name: Build core
+        run: dotnet build "TaskOrchestrator\TaskOrchestrator.csproj" --configuration Release --no-restore
+
+      - name: Restore dependencies test
+        run: dotnet "TaskOrchestrator\TaskOrchestrator.csproj" restore
+
+      - name: Build test
+        run: dotnet build "Tests/Tests.csproj" --configuration Release --no-restore
+
+      - name: Test
+        run: dotnet test "Tests/Tests.csproj" --configuration Release --no-build --verbosity normal
