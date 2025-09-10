@@ -1,0 +1,28 @@
+on:
+  release:
+    types: [published]
+
+jobs:
+  build-and-publish:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.0.x'
+
+      - name: Restore dependencies
+        run: dotnet restore TaskOrchestrator/TaskOrchestrator.csproj
+
+      - name: Build
+        run: dotnet build TaskOrchestrator/TaskOrchestrator.csproj --configuration Release --no-restore
+
+      - name: Pack
+        run: dotnet pack TaskOrchestrator/TaskOrchestrator.csproj --configuration Release -o out
+
+      - name: Push to NuGet
+        run: dotnet nuget push out/*.nupkg --api-key ${{ secrets.NUGET_API_KEY }} --source https://api.nuget.org/v3/index.json
