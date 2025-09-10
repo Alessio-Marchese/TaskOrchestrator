@@ -58,6 +58,20 @@ var hybridPool = HybridPool.Create(
         (info, ex) => Console.WriteLine($"Task: {info.id} Just failed :( \n{ex.StackTrace}")
     )
 );
+
+//Enqueue Sync
+hybridPool.Enqueue(
+    () =>
+    {
+        Thread.Sleep(100); // Do stuff
+    }, i /*Weight*/);
+
+//Enqueue Async
+hybridPool.Enqueue(
+    async () =>
+    {
+        await Task.Delay(100); // Do stuff
+    }, i /*Weight*/);
 ```
 
 ### Breakdown
