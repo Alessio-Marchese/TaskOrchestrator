@@ -50,12 +50,12 @@ Each pool can be customized with:
 ```csharp
 var hybridPool = HybridPool.Create(
     Options.GetElasticOptions(
-        2,
-        5,
-        TimeSpan.FromSeconds(10),
-        (info) => Console.WriteLine($"Before Executing Task:{info.id}"),
-        (info) => Console.WriteLine($"After Executing Task:{info.id}"),
-        (info, ex) => Console.WriteLine($"Task: {info.id} Just failed :( \n{ex.StackTrace}")
+        2, // Workers
+        5, // MaxElasticWorkers
+        TimeSpan.FromSeconds(10), // 10s Idle
+        (info) => Console.WriteLine($"Before Executing Task:{info.id}"), // BeforeExecution Hook
+        (info) => Console.WriteLine($"After Executing Task:{info.id}"), // AfterExecution Hook
+        (info, ex) => Console.WriteLine($"Task: {info.id} Just failed :( \n{ex.StackTrace}") // OnFailure Hook
     )
 );
 
