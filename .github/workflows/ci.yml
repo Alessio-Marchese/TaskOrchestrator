@@ -2,8 +2,6 @@ name: CI NuGet
 
 on:
   push:
-    branches:
-      - add-ci
   release:
     types: [published]
 
