@@ -20,16 +20,10 @@ jobs:
           dotnet-version: '8.0.x'
 
       - name: Restore dependencies core
-        run: dotnet "Tests/Tests.csproj" restore
+        run: dotnet restore TaskOrchestrator.sln
 
       - name: Build core
-        run: dotnet build "TaskOrchestrator\TaskOrchestrator.csproj" --configuration Release --no-restore
-
-      - name: Restore dependencies test
-        run: dotnet "TaskOrchestrator\TaskOrchestrator.csproj" restore
-
-      - name: Build test
-        run: dotnet build "Tests/Tests.csproj" --configuration Release --no-restore
+        run: dotnet build TaskOrchestrator.sln --configuration Release
 
       - name: Test
-        run: dotnet test "Tests/Tests.csproj" --configuration Release --no-build --verbosity normal
+        run: dotnet test Tests/Tests.csproj --configuration Release --no-build
