@@ -1,4 +1,5 @@
-﻿using TaskOrchestrator.Internal;
+﻿using System.Collections.Concurrent;
+using TaskOrchestrator.Internal;
 using TaskOrchestrator.Utils;
 
 namespace TaskOrchestrator.Core;
@@ -12,10 +13,10 @@ internal class SyncPool : IDisposable
 
     private readonly CancellationTokenSource _cts = new();
     private readonly List<Task> _workers = new();
-    private readonly List<Task> _elasticWorkers = new();
+    private readonly ConcurrentBag<Task> _elasticWorkers = new();
+    private volatile int _elasticWorkersCount = 0;
     private readonly SemaphoreSlim _signal;
     private readonly SyncQueue _queue = new();
-    private readonly object _elasticLock = new();
 
     public SyncPool(Options options)
     {
@@ -31,22 +32,18 @@ internal class SyncPool : IDisposable
 
     public void Enqueue(Action action, int weight = 0)
     {
-        lock (_elasticLock)
-        {
-            _queue.Enqueue(new Identified<Action>(action, weight), weight);
-            _signal.Release();
-            if (_signal.CurrentCount == 0)
-            {
-                EnsureElasticWorkers();
-            }
-        }
+        _queue.Enqueue(action, weight);
+        _signal.Release();
+        
+        if (_signal.CurrentCount == 0)
+            EnsureElasticWorkers();
     }
 
     public int PendingWorkCount()
-        => _queue.PendingWorkCount();
+        => _queue.PendingWorkCount;
 
     public int CurrentElasticWorkersCount()
-        => _elasticWorkers.Count;
+        => _elasticWorkersCount;
 
     public void Dispose()
     {
@@ -64,16 +61,18 @@ internal class SyncPool : IDisposable
     #region PRIVATE
     private void EnsureElasticWorkers()
     {
-        if (_queue.IsEmpty || _elasticWorkers.Count >= Options.MaxElasticWorkers)
+        if (_queue.IsEmpty || _elasticWorkersCount >= Options.MaxElasticWorkers)
             return;
 
-        lock (_elasticLock)
+        if (Interlocked.CompareExchange(ref _elasticWorkersCount, 
+            _elasticWorkersCount + 1, _elasticWorkersCount) < Options.MaxElasticWorkers)
         {
-            if (_elasticWorkers.Count < Options.MaxElasticWorkers && !_queue.IsEmpty)
-            {
-                var workerTask = Task.Run(() => ElasticWorkerLoopAsync(_cts.Token));
-                _elasticWorkers.Add(workerTask);
-            }
+            var workerTask = Task.Run(() => ElasticWorkerLoopAsync(_cts.Token));
+            _elasticWorkers.Add(workerTask);
+        }
+        else
+        {
+            Interlocked.Decrement(ref _elasticWorkersCount);
         }
     }
     private async Task WorkerLoopAsync(CancellationToken token)
@@ -91,52 +90,47 @@ internal class SyncPool : IDisposable
 
             if (_queue.TryDequeue(out var task))
             {
-                if (task != null)
-                    ExecuteTask(task);
+                ExecuteTask(task);
             }
         }
     }
 
     private async Task ElasticWorkerLoopAsync(CancellationToken token)
     {
-        int? taskId = Task.CurrentId;
-
-        while (!token.IsCancellationRequested)
+        try
         {
-            try
+            while (!token.IsCancellationRequested)
             {
-                await _signal.WaitAsync(Options.ElasticWorkersTimeout, token);
-            }
-            catch (OperationCanceledException)
-            {
-                break;
-            }
-            catch (TimeoutException)
-            {
-                break;
-            }
+                try
+                {
+                    await _signal.WaitAsync(Options.ElasticWorkersTimeout, token);
+                }
+                catch (OperationCanceledException)
+                {
+                    break;
+                }
+                catch (TimeoutException)
+                {
+                    break;
+                }
 
-            if (_queue.TryDequeue(out var task))
-            {
-                if (task != null)
+                if (_queue.TryDequeue(out var task))
+                {
                     ExecuteTask(task);
-            }
-            else
-            {
-                break;
+                }
+                else
+                {
+                    break;
+                }
             }
         }
-
-        lock (_elasticLock)
+        finally
         {
-            if (taskId.HasValue)
-            {
-                _elasticWorkers.RemoveAll(t => t.Id == taskId);
-            }
+            Interlocked.Decrement(ref _elasticWorkersCount);
         }
     }
 
-    private void ExecuteTask(Identified<Action> action)
+    private void ExecuteTask(TaskItem<Action> action)
     {
         try
         {
