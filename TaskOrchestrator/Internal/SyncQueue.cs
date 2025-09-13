@@ -4,18 +4,18 @@ namespace TaskOrchestrator.Internal;
 
 public class SyncQueue
 {
-    private readonly PriorityQueue<Identified<Action>, int> _syncQueue = new();
+    private readonly PriorityQueue<TaskItem<Action>, int> _syncQueue = new();
     private readonly object _lock = new();
 
-    public void Enqueue(Identified<Action> item, int priority)
+    public void Enqueue(Action entity, int weight)
     {
         lock (_lock)
         {
-            _syncQueue.Enqueue(item, -priority);
+            _syncQueue.Enqueue(new TaskItem<Action>(entity, weight), -weight);
         }
     }
 
-    public bool TryDequeue(out Identified<Action>? item)
+    public bool TryDequeue(out TaskItem<Action> item)
     {
         lock (_lock)
         {
@@ -34,6 +34,8 @@ public class SyncQueue
         get { lock (_lock) return _syncQueue.Count == 0; }
     }
 
-    public int PendingWorkCount()
-        => _syncQueue.Count;
+    public int PendingWorkCount
+    {
+        get { lock (_lock) return _syncQueue.Count; }
+    }
 }
