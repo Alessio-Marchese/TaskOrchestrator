@@ -4,13 +4,13 @@ namespace TaskOrchestrator.Core;
 
 public class HybridPool : IDisposable
 {
-    private readonly AsyncPool _asyncPoolService;
-    private readonly SyncPool _syncPoolService;
+    public AsyncPool AsyncPoolService { get; private set; }
+    public SyncPool SyncPoolService { get; private set; }
 
     private HybridPool(AsyncPool asyncPoolService, SyncPool syncPoolService)
     {
-        _asyncPoolService = asyncPoolService;
-        _syncPoolService = syncPoolService;
+        AsyncPoolService = asyncPoolService;
+        SyncPoolService = syncPoolService;
     }
 
     public static HybridPool Create(Options options)
@@ -23,41 +23,41 @@ public class HybridPool : IDisposable
 
     public void Enqueue(Func<Task> task, int weight = 0)
     {
-        if (_asyncPoolService.Options.Workers < 1 && _asyncPoolService.Options.MaxElasticWorkers < 1)
+        if (AsyncPoolService.Options.Workers < 1 && AsyncPoolService.Options.MaxElasticWorkers < 1)
             throw new InvalidOperationException("Must have at least 1 worker in the configuration");
 
-        _asyncPoolService.Enqueue(task, weight);
+        AsyncPoolService.Enqueue(task, weight);
     }
 
     public void Enqueue(Action action, int weight = 0)
     {
-        if (_syncPoolService.Options.Workers < 1 && _syncPoolService.Options.MaxElasticWorkers < 1)
+        if (SyncPoolService.Options.Workers < 1 && SyncPoolService.Options.MaxElasticWorkers < 1)
             throw new InvalidOperationException("Must have at least 1 worker in the configuration");
 
-        _syncPoolService.Enqueue(action, weight);
+        SyncPoolService.Enqueue(action, weight);
     }
 
     public int PendingWorkCount()
-        => _asyncPoolService.PendingWorkCount() + _syncPoolService.PendingWorkCount();
+        => AsyncPoolService.PendingWorkCount() + SyncPoolService.PendingWorkCount();
 
     public int PendingAsyncWorkCount()
-        => _asyncPoolService.PendingWorkCount();
+        => AsyncPoolService.PendingWorkCount();
 
     public int PendingSyncWorkCount()
-        => _syncPoolService.PendingWorkCount();
+        => SyncPoolService.PendingWorkCount();
 
     public int CurrentElasticWorkers()
-        => _asyncPoolService.CurrentElasticWorkersCount() + _syncPoolService.CurrentElasticWorkersCount();
+        => AsyncPoolService.CurrentElasticWorkersCount() + SyncPoolService.CurrentElasticWorkersCount();
 
     public int CurrentAsyncElasticWorkers()
-        => _asyncPoolService.CurrentElasticWorkersCount();
+        => AsyncPoolService.CurrentElasticWorkersCount();
 
     public int CurrentSyncElasticWorkers()
-        => _syncPoolService.CurrentElasticWorkersCount();
+        => SyncPoolService.CurrentElasticWorkersCount();
 
     public void Dispose()
     {
-        _syncPoolService.Dispose();
-        _asyncPoolService.Dispose();
+        SyncPoolService.Dispose();
+        AsyncPoolService.Dispose();
     }
 }

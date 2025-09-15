@@ -9,7 +9,7 @@
   <!-- Info NuGet -->
   <PropertyGroup>
    <PackageId>TaskOrchestrator</PackageId>
-   <Version>1.0.1</Version>
+   <Version>1.0.2</Version>
    <Authors>Alessio Marchese</Authors>
    <Description>.NET Library to Orchestrate tasks</Description>
    <PackageTags>task orchestrator scheduler threading</PackageTags>

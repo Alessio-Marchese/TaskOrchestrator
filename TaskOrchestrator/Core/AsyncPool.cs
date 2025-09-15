@@ -4,12 +4,9 @@ using TaskOrchestrator.Utils;
 
 namespace TaskOrchestrator.Core;
 
-internal class AsyncPool : IDisposable
+public class AsyncPool : IDisposable
 {
     public readonly Options Options;
-    public event Action<TaskInfo>? BeforeExecution;
-    public event Action<TaskInfo>? AfterExecution;
-    public event Action<TaskInfo, Exception>? OnFailure;
 
     private readonly CancellationTokenSource _cts = new();
     private readonly List<Task> _workers = new();
@@ -17,6 +14,9 @@ internal class AsyncPool : IDisposable
     private volatile int _elasticWorkersCount = 0;
     private readonly SemaphoreSlim _signal;
     private readonly AsyncQueue _queue = new();
+    private event Action<TaskInfo>? BeforeExecution;
+    private event Action<TaskInfo>? AfterExecution;
+    private event Action<TaskInfo, Exception>? OnFailure;
 
     public AsyncPool(Options options)
     {
