@@ -2,9 +2,9 @@
 
 public class TaskInfo
 {
-    public int Id { get; set; }
-    public int Weight { get; set; }
-    public bool IsAsync { get; set; }
+    public int Id { get; private set; }
+    public int Weight { get; private set; }
+    public bool IsAsync { get; private set; }
 
     public TaskInfo(int id, int weight, bool isAsync)
     {

@@ -12,8 +12,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Misc", "Misc", "{8EC462FD-D
 		.gitattributes = .gitattributes
 		.gitignore = .gitignore
 		LICENSE.txt = LICENSE.txt
-		Patch_Notes_1.0.1.md = Patch_Notes_1.0.1.md
 		README.md = README.md
+		Patch_Notes_1.0.2.md = Patch_Notes_1.0.2.md
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".github", ".github", "{C9925C55-23D6-4432-B0EF-80C245DDA194}"

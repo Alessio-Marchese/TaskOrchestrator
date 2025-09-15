@@ -1,7 +1,7 @@
 # TaskOrchestrator 📊
 
-**TaskOrchestrator** is a high-performance, production-ready utility for managing concurrent tasks.
-It provides flexible **Sync, Async, and Hybrid pools** with advanced optimizations for memory efficiency and thread safety.
+**TaskOrchestrator** is a lightweight utility for managing concurrent tasks.
+It provides flexible **Sync, Async, and Hybrid pools**, each with configurable behaviors.
 
 ---
 
@@ -91,30 +91,56 @@ It’s still in **early development**, but the goal is to build something:
 * ✅ Solid
 * ✅ User-friendly
 * ✅ Practical
-* ✅ **Zero Allocations**: Synchronous tasks use struct-based implementation
-* ✅ **Memory Efficiency**: Automatic cleanup of elastic workers
-* ✅ **Thread Safety**: Optimized lock contention and atomic operations
-* ✅ **High Performance**: Linear scalability with minimal GC pressure
+
+> I’m still learning the **Task Parallel Library (TPL)** and iterating daily to improve stability, usability, and performance.
 
 ---
 
-## 📊 Performance
+## Currently working on
 
-TaskOrchestrator delivers exceptional performance with:
+* **NuGet Distribution**
+  
+* **GitHub Actions to learn how to CI/CD the package**
 
-* **100% reduction** in memory allocations for synchronous tasks
-* **Linear scalability** from 100 to 10,000+ tasks
-* **Minimal lock contention** with atomic operations
-* **Zero memory leaks** with automatic resource cleanup
+---
 
-### Benchmark Results
-- **CPU-Bound 1000 sync tasks**: 1.359 ms (zero allocations)
-- **CPU-Bound 1000 async tasks**: 9.877 ms (minimal allocations)
+## 🧪 Testing
+
+TaskOrchestrator includes a comprehensive test suite with covering:
+
+### Test Coverage
+* ✅ **Factory Methods** - Pool creation with different configurations
+* ✅ **Async Task Execution** - Task enqueueing and execution
+* ✅ **Sync Action Execution** - Action enqueueing and execution
+* ✅ **Pending Work Count** - Queue monitoring and statistics
+* ✅ **Elastic Workers** - Dynamic worker management
+* ✅ **Callback System** - Lifecycle event handling
+* ✅ **Concurrent Execution** - Multi-threaded task processing
+* ✅ **Weight Priority** - Task prioritization system
+* ✅ **Resource Management** - Proper disposal and cleanup
+* ✅ **Edge Cases** - Error handling and boundary conditions
+* ✅ **Options Validation** - Configuration parameter validation
+* ✅ **TaskInfo & TaskItem** - Data structure functionality
+
+### Running Tests
+```bash
+cd Tests
+dotnet test --verbosity normal
+```
+
+### Test-Driven Development
+The test suite ensures:
+- **Correctness** of the hybrid pool logic
+- **Thread safety** in concurrent scenarios
+- **Resource management** and proper cleanup
+- **Configuration validation** and error handling
+- **Performance characteristics** under load
+
 ---
 
 ## 🛠️ Development Status
 
-**Current Version**: 1.0.1
+**Current Version**: 1.0.2
 
 ### Recently Completed
 * ✅ **Memory optimization** with struct-based task implementation
@@ -122,7 +148,8 @@ TaskOrchestrator delivers exceptional performance with:
 * ✅ **Memory leak elimination** in elastic workers
 * ✅ **Comprehensive benchmarking** system
 * ✅ **Performance validation** with realistic workloads
-
+* ✅ **Complete test suite** with 57 unit tests
+* ✅ **Test-driven development** approach
 
 ## 🔮 Future Improvements
 
