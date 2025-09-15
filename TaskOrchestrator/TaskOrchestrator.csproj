@@ -20,7 +20,11 @@
   </PropertyGroup>
 
 	<ItemGroup>
-		<None Include="docs\README.md" Pack="true" PackagePath="\"/>
+		<None Include="docs\README.md" />
+	</ItemGroup>
+
+	<ItemGroup>
+	  <Folder Include="docs\" />
 	</ItemGroup>
 
 </Project>
